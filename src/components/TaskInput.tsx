@@ -1,3 +1,247 @@
+// import { useState } from "react";
+// import { Task } from "@/types/task";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Textarea } from "@/components/ui/textarea";
+// import { Card } from "@/components/ui/card";
+// import { Plus, Upload } from "lucide-react";
+// import { toast } from "sonner";
+
+// interface TaskInputProps {
+//   onTasksSubmit: (tasks: Task[]) => void;
+// }
+
+// export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
+//   const [title, setTitle] = useState("");
+//   const [dueDate, setDueDate] = useState("");
+//   const [estimatedHours, setEstimatedHours] = useState("");
+//   const [importance, setImportance] = useState("");
+//   const [dependencies, setDependencies] = useState("");
+//   const [jsonInput, setJsonInput] = useState("");
+//   const [tasks, setTasks] = useState<Task[]>([]);
+
+//   const generateId = () => `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+//   const addTask = () => {
+//     if (!title.trim()) {
+//       toast.error("Title is required");
+//       return;
+//     }
+
+//     if (!dueDate) {
+//       toast.error("Due date is required");
+//       return;
+//     }
+
+//     const importanceNum = Number(importance);
+//     if (isNaN(importanceNum) || importanceNum < 1 || importanceNum > 10) {
+//       toast.error("Importance must be between 1 and 10");
+//       return;
+//     }
+
+//     const hoursNum = Number(estimatedHours);
+//     if (isNaN(hoursNum) || hoursNum < 0) {
+//       toast.error("Estimated hours must be a positive number");
+//       return;
+//     }
+
+//     const newTask: Task = {
+//       id: generateId(),
+//       title: title.trim(),
+//       dueDate,
+//       estimatedHours: hoursNum,
+//       importance: importanceNum,
+//       dependencies: dependencies
+//         .split(",")
+//         .map(d => d.trim())
+//         .filter(d => d.length > 0),
+//     };
+
+//     const updatedTasks = [...tasks, newTask];
+//     setTasks(updatedTasks);
+//     toast.success("Task added successfully");
+
+//     // Clear form
+//     setTitle("");
+//     setDueDate("");
+//     setEstimatedHours("");
+//     setImportance("");
+//     setDependencies("");
+//   };
+
+//   const handleJsonImport = () => {
+//     try {
+//       const parsed = JSON.parse(jsonInput);
+//       const tasksArray = Array.isArray(parsed) ? parsed : [parsed];
+      
+//       const validTasks: Task[] = tasksArray.map((task, index) => ({
+//         id: task.id || generateId(),
+//         title: task.title || `Imported Task ${index + 1}`,
+//         dueDate: task.dueDate || task.due_date || new Date().toISOString().split("T")[0],
+//         estimatedHours: Number(task.estimatedHours || task.estimated_hours || 1),
+//         importance: Math.min(10, Math.max(1, Number(task.importance || 5))),
+//         dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
+//       }));
+
+//       setTasks(validTasks);
+//       setJsonInput("");
+//       toast.success(`Imported ${validTasks.length} tasks`);
+//     } catch (error) {
+//       toast.error("Invalid JSON format. Please check your input.");
+//     }
+//   };
+
+//   const handleAnalyze = () => {
+//     if (tasks.length === 0) {
+//       toast.error("Please add at least one task");
+//       return;
+//     }
+//     onTasksSubmit(tasks);
+//   };
+
+//   return (
+//     <div className="space-y-6">
+//       <Card className="p-6 bg-gradient-card shadow-medium border-border/50">
+//         <h2 className="text-2xl font-bold mb-6 text-foreground">Add Task</h2>
+//         <div className="space-y-4">
+//           <div>
+//             <Label htmlFor="title" className="text-foreground/90">Task Title *</Label>
+//             <Input
+//               id="title"
+//               value={title}
+//               onChange={(e) => setTitle(e.target.value)}
+//               placeholder="e.g., Fix login bug"
+//               className="mt-1.5"
+//             />
+//           </div>
+
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             <div>
+//               <Label htmlFor="dueDate" className="text-foreground/90">Due Date *</Label>
+//               <Input
+//                 id="dueDate"
+//                 type="date"
+//                 value={dueDate}
+//                 onChange={(e) => setDueDate(e.target.value)}
+//                 className="mt-1.5"
+//               />
+//             </div>
+
+//             <div>
+//               <Label htmlFor="estimatedHours" className="text-foreground/90">Estimated Hours *</Label>
+//               <Input
+//                 id="estimatedHours"
+//                 type="number"
+//                 min="0"
+//                 step="0.5"
+//                 value={estimatedHours}
+//                 onChange={(e) => setEstimatedHours(e.target.value)}
+//                 placeholder="e.g., 3"
+//                 className="mt-1.5"
+//               />
+//             </div>
+//           </div>
+
+//           <div>
+//             <Label htmlFor="importance" className="text-foreground/90">
+//               Importance (1-10) *
+//             </Label>
+//             <Input
+//               id="importance"
+//               type="number"
+//               min="1"
+//               max="10"
+//               value={importance}
+//               onChange={(e) => setImportance(e.target.value)}
+//               placeholder="e.g., 8"
+//               className="mt-1.5"
+//             />
+//           </div>
+
+//           <div>
+//             <Label htmlFor="dependencies" className="text-foreground/90">
+//               Dependencies (comma-separated IDs)
+//             </Label>
+//             <Input
+//               id="dependencies"
+//               value={dependencies}
+//               onChange={(e) => setDependencies(e.target.value)}
+//               placeholder="e.g., task-1, task-2"
+//               className="mt-1.5"
+//             />
+//           </div>
+
+//           <Button
+//             onClick={addTask}
+//             className="w-full bg-gradient-hero hover:opacity-90 transition-opacity"
+//           >
+//             <Plus className="w-4 h-4 mr-2" />
+//             Add Task
+//           </Button>
+//         </div>
+//       </Card>
+
+//       <Card className="p-6 bg-gradient-card shadow-medium border-border/50">
+//         <h2 className="text-2xl font-bold mb-4 text-foreground">Bulk Import (JSON)</h2>
+//         <div className="space-y-4">
+//           <Textarea
+//             value={jsonInput}
+//             onChange={(e) => setJsonInput(e.target.value)}
+//             placeholder='[{"title": "Task 1", "dueDate": "2025-12-31", "estimatedHours": 3, "importance": 8, "dependencies": []}]'
+//             className="min-h-[120px] font-mono text-sm"
+//           />
+//           <Button
+//             onClick={handleJsonImport}
+//             variant="outline"
+//             className="w-full"
+//           >
+//             <Upload className="w-4 h-4 mr-2" />
+//             Import JSON
+//           </Button>
+//         </div>
+//       </Card>
+
+//       {tasks.length > 0 && (
+//         <Card className="p-6 bg-gradient-card shadow-medium border-border/50">
+//           <div className="flex items-center justify-between mb-4">
+//             <h3 className="text-lg font-semibold text-foreground">
+//               Added Tasks ({tasks.length})
+//             </h3>
+//             <Button
+//               onClick={handleAnalyze}
+//               size="lg"
+//               className="bg-gradient-hero hover:opacity-90 transition-opacity shadow-medium"
+//             >
+//               Analyze Tasks
+//             </Button>
+//           </div>
+//           <div className="space-y-2">
+//             {tasks.map((task) => (
+//               <div
+//                 key={task.id}
+//                 className="p-3 bg-muted/50 rounded-lg text-sm border border-border/30"
+//               >
+//                 <div className="font-medium text-foreground">{task.title}</div>
+//                 <div className="text-muted-foreground mt-1">
+//                   Due: {task.dueDate} • {task.estimatedHours}h • Importance: {task.importance}/10
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </Card>
+//       )}
+//     </div>
+//   );
+// };
+
+
+
+
+
+
+
+
 import { useState } from "react";
 import { Task } from "@/types/task";
 import { Button } from "@/components/ui/button";
@@ -21,7 +265,8 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
   const [jsonInput, setJsonInput] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const generateId = () => `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const generateId = () =>
+    `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const addTask = () => {
     if (!title.trim()) {
@@ -54,15 +299,14 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
       importance: importanceNum,
       dependencies: dependencies
         .split(",")
-        .map(d => d.trim())
-        .filter(d => d.length > 0),
+        .map((d) => d.trim())
+        .filter((d) => d.length > 0),
     };
 
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     toast.success("Task added successfully");
 
-    // Clear form
     setTitle("");
     setDueDate("");
     setEstimatedHours("");
@@ -74,14 +318,24 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
     try {
       const parsed = JSON.parse(jsonInput);
       const tasksArray = Array.isArray(parsed) ? parsed : [parsed];
-      
+
       const validTasks: Task[] = tasksArray.map((task, index) => ({
         id: task.id || generateId(),
         title: task.title || `Imported Task ${index + 1}`,
-        dueDate: task.dueDate || task.due_date || new Date().toISOString().split("T")[0],
-        estimatedHours: Number(task.estimatedHours || task.estimated_hours || 1),
-        importance: Math.min(10, Math.max(1, Number(task.importance || 5))),
-        dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
+        dueDate:
+          task.dueDate ||
+          task.due_date ||
+          new Date().toISOString().split("T")[0],
+        estimatedHours: Number(
+          task.estimatedHours || task.estimated_hours || 1
+        ),
+        importance: Math.min(
+          10,
+          Math.max(1, Number(task.importance || 5))
+        ),
+        dependencies: Array.isArray(task.dependencies)
+          ? task.dependencies
+          : [],
       }));
 
       setTasks(validTasks);
@@ -102,34 +356,55 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 bg-gradient-card shadow-medium border-border/50">
-        <h2 className="text-2xl font-bold mb-6 text-foreground">Add Task</h2>
+      <Card className="p-6 bg-gradient-card shadow-xl border border-border/40 hover:scale-[1.01] transition-all duration-300 rounded-2xl">
+        <h2 className="text-3xl font-extrabold mb-6 text-center bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+          Add Task
+        </h2>
+
         <div className="space-y-4">
           <div>
-            <Label htmlFor="title" className="text-foreground/90">Task Title *</Label>
+            <Label
+              htmlFor="title"
+              className="text-foreground/90 font-medium"
+            >
+              Task Title *
+            </Label>
+
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Fix login bug"
-              className="mt-1.5"
+              className="mt-1.5 rounded-xl shadow-sm"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="dueDate" className="text-foreground/90">Due Date *</Label>
+              <Label
+                htmlFor="dueDate"
+                className="text-foreground/90 font-medium"
+              >
+                Due Date *
+              </Label>
+
               <Input
                 id="dueDate"
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="mt-1.5"
+                className="mt-1.5 rounded-xl shadow-sm"
               />
             </div>
 
             <div>
-              <Label htmlFor="estimatedHours" className="text-foreground/90">Estimated Hours *</Label>
+              <Label
+                htmlFor="estimatedHours"
+                className="text-foreground/90 font-medium"
+              >
+                Estimated Hours *
+              </Label>
+
               <Input
                 id="estimatedHours"
                 type="number"
@@ -138,15 +413,19 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
                 value={estimatedHours}
                 onChange={(e) => setEstimatedHours(e.target.value)}
                 placeholder="e.g., 3"
-                className="mt-1.5"
+                className="mt-1.5 rounded-xl shadow-sm"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="importance" className="text-foreground/90">
+            <Label
+              htmlFor="importance"
+              className="text-foreground/90 font-medium"
+            >
               Importance (1-10) *
             </Label>
+
             <Input
               id="importance"
               type="number"
@@ -155,26 +434,30 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
               value={importance}
               onChange={(e) => setImportance(e.target.value)}
               placeholder="e.g., 8"
-              className="mt-1.5"
+              className="mt-1.5 rounded-xl shadow-sm"
             />
           </div>
 
           <div>
-            <Label htmlFor="dependencies" className="text-foreground/90">
+            <Label
+              htmlFor="dependencies"
+              className="text-foreground/90 font-medium"
+            >
               Dependencies (comma-separated IDs)
             </Label>
+
             <Input
               id="dependencies"
               value={dependencies}
               onChange={(e) => setDependencies(e.target.value)}
               placeholder="e.g., task-1, task-2"
-              className="mt-1.5"
+              className="mt-1.5 rounded-xl shadow-sm"
             />
           </div>
 
           <Button
             onClick={addTask}
-            className="w-full bg-gradient-hero hover:opacity-90 transition-opacity"
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:scale-105 transition-all duration-300 text-white font-semibold rounded-xl py-6"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Task
@@ -182,19 +465,23 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
         </div>
       </Card>
 
-      <Card className="p-6 bg-gradient-card shadow-medium border-border/50">
-        <h2 className="text-2xl font-bold mb-4 text-foreground">Bulk Import (JSON)</h2>
+      <Card className="p-6 bg-gradient-card shadow-xl border border-border/40 rounded-2xl">
+        <h2 className="text-2xl font-bold mb-4 text-foreground text-center">
+          Bulk Import (JSON)
+        </h2>
+
         <div className="space-y-4">
           <Textarea
             value={jsonInput}
             onChange={(e) => setJsonInput(e.target.value)}
             placeholder='[{"title": "Task 1", "dueDate": "2025-12-31", "estimatedHours": 3, "importance": 8, "dependencies": []}]'
-            className="min-h-[120px] font-mono text-sm"
+            className="min-h-[120px] font-mono text-sm rounded-xl"
           />
+
           <Button
             onClick={handleJsonImport}
             variant="outline"
-            className="w-full"
+            className="w-full rounded-xl hover:bg-primary hover:text-white transition-all duration-300"
           >
             <Upload className="w-4 h-4 mr-2" />
             Import JSON
@@ -203,28 +490,34 @@ export const TaskInput = ({ onTasksSubmit }: TaskInputProps) => {
       </Card>
 
       {tasks.length > 0 && (
-        <Card className="p-6 bg-gradient-card shadow-medium border-border/50">
+        <Card className="p-6 bg-gradient-card shadow-xl border border-border/40 rounded-2xl">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-foreground">
               Added Tasks ({tasks.length})
             </h3>
+
             <Button
               onClick={handleAnalyze}
               size="lg"
-              className="bg-gradient-hero hover:opacity-90 transition-opacity shadow-medium"
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:scale-105 transition-all duration-300 shadow-medium rounded-xl"
             >
               Analyze Tasks
             </Button>
           </div>
-          <div className="space-y-2">
+
+          <div className="space-y-3">
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="p-3 bg-muted/50 rounded-lg text-sm border border-border/30"
+                className="p-4 bg-white/5 backdrop-blur-md rounded-xl text-sm border border-purple-500/20 hover:border-purple-500/40 transition-all"
               >
-                <div className="font-medium text-foreground">{task.title}</div>
+                <div className="font-medium text-foreground text-base">
+                  {task.title}
+                </div>
+
                 <div className="text-muted-foreground mt-1">
-                  Due: {task.dueDate} • {task.estimatedHours}h • Importance: {task.importance}/10
+                  Due: {task.dueDate} • {task.estimatedHours}h • Importance:
+                  {task.importance}/10
                 </div>
               </div>
             ))}
