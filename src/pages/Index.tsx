@@ -75,7 +75,7 @@ const Index = () => {
                     <Brain className="w-12 h-12 text-primary" />
                   </div>
                   <h2 className="text-2xl font-bold text-foreground mb-3">
-                    Smart AI Task Analyzer
+                    AI Task Analyzer
                   </h2>
                   <p className="text-muted-foreground">
                     Track, prioritize, and optimize your workflow with intelligent task analysis and real-time productivity insights.
