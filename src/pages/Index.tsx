@@ -38,7 +38,7 @@ const Index = () => {
   };
 
   return (
-   <div className="min-h-screen bg-background">
+   <div className="min-h-screen bg-[#2b3445]">
   {/* Header */}
   <header className="sticky top-0 z-50 border-b border-border/50 bg-card/95 backdrop-blur-lg shadow-soft">
     <div className="container mx-auto px-4 py-4">
@@ -77,7 +77,7 @@ const Index = () => {
                 <Brain className="w-12 h-12 text-primary" />
               </div>
 
-              <h2 className="text-2xl font-bold text-foreground mb-3">
+              <h2 className="text-2xl font-bold text-cyan-400 mb-3">
                 AI Task Analyzer
               </h2>
 
